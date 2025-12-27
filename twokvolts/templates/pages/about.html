@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}О компании{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <h1 class="display-4 mb-4">О компании</h1>
+                <p class="lead">
+                    <strong>ЭнергоПоставщик</strong> — надежный партнер в сфере поставок электроэнергии 
+                    для населения и бизнеса с 2005 года.
+                </p>
+                
+                <h3 class="mt-5 mb-3">Наша миссия</h3>
+                <p>
+                    Обеспечивать стабильное и качественное электроснабжение, предоставляя клиентам 
+                    современные сервисы и прозрачные условия сотрудничества.
+                </p>
+                
+                <h3 class="mt-5 mb-3">Наши ценности</h3>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card border h-100">
+                            <div class="card-body">
+                                <h5><i class="fas fa-shield-alt text-primary me-2"></i>Надежность</h5>
+                                <p class="mb-0">Гарантируем бесперебойные поставки электроэнергии 24/7</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card border h-100">
+                            <div class="card-body">
+                                <h5><i class="fas fa-handshake text-primary me-2"></i>Прозрачность</h5>
+                                <p class="mb-0">Четкие тарифы и детализированные отчеты для клиентов</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="mb-4">Наши достижения</h5>
+                <div class="achievement mb-4">
+                    <div class="display-6 fw-bold text-primary">15+</div>
+                    <p class="text-muted">Лет на рынке</p>
+                </div>
+                <div class="achievement mb-4">
+                    <div class="display-6 fw-bold text-primary">50,000+</div>
+                    <p class="text-muted">Довольных клиентов</p>
+                </div>
+                <div class="achievement mb-4">
+                    <div class="display-6 fw-bold text-primary">99.8%</div>
+                    <p class="text-muted">Надежность поставок</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

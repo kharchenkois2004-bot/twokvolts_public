@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои счета{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Личный кабинет</a></li>
+<li class="breadcrumb-item active" aria-current="page">Счета и оплата</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Счета и оплата</h2>
+    <div>
+        <a href="#" class="btn btn-outline-primary" id="exportInvoices">
+            <i class="fas fa-download me-1"></i>Экспорт
+        </a>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="icon-wrapper bg-primary bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                         style="width: 50px; height: 50px;">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Всего счетов</h6>
+                        <h4 class="mb-0">{{ invoices_count }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="icon-wrapper bg-warning bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                         style="width: 50px; height: 50px;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Ожидает оплаты</h6>
+                        <h4 class="mb-0">{{ pending_count }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="icon-wrapper bg-danger bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                         style="width: 50px; height: 50px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Просрочено</h6>
+                        <h4 class="mb-0">{{ overdue_count }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="icon-wrapper bg-success bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                         style="width: 50px; height: 50px;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted mb-1">Оплачено</h6>
+                        <h4 class="mb-0">{{ paid_count }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters and Actions -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="btn-group" role="group">
+                    <a href="?status=" class="btn btn-outline-primary {% if not request.GET.status %}active{% endif %}">
+                        Все
+                    </a>
+                    <a href="?status=issued" class="btn btn-outline-warning {% if request.GET.status == 'issued' %}active{% endif %}">
+                        Ожидает оплаты
+                    </a>
+                    <a href="?status=paid" class="btn btn-outline-success {% if request.GET.status == 'paid' %}active{% endif %}">
+                        Оплачено
+                    </a>
+                    <a href="?status=overdue" class="btn btn-outline-danger {% if request.GET.status == 'overdue' %}active{% endif %}">
+                        Просрочено
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="alert alert-info py-2 mb-0">
+                    <strong>Общая задолженность:</strong> 
+                    <span class="fw-bold">{{ total_debt|floatformat:2 }} ₽</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Invoices Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 10%">№ счета</th>
+                        <th style="width: 15%">Период</th>
+                        <th style="width: 20%">Договор</th>
+                        <th style="width: 15%">Потребление</th>
+                        <th style="width: 15%">Сумма</th>
+                        <th style="width: 15%">Статус</th>
+                        <th style="width: 10%">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices %}
+                    <tr class="{% if invoice.status == 'overdue' %}table-danger{% elif invoice.status == 'issued' %}table-warning{% endif %}">
+                        <td>
+                            <strong>#{{ invoice.id }}</strong><br>
+                            <small class="text-muted">{{ invoice.issue_date|date:"d.m.Y" }}</small>
+                        </td>
+                        <td>
+                            {{ invoice.period|date:"F Y" }}<br>
+                            <small class="text-muted">до {{ invoice.due_date|date:"d.m.Y" }}</small>
+                        </td>
+                        <td>
+                            <div>
+                                <strong>{{ invoice.contract.contract_number }}</strong><br>
+                                <small class="text-muted">{{ invoice.contract.consumer.full_name }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info rounded-pill">
+                                {{ invoice.consumption|floatformat:2 }} кВт·ч
+                            </span><br>
+                            <small class="text-muted">{{ invoice.contract.tariff.rate }} ₽/кВт·ч</small>
+                        </td>
+                        <td>
+                            <div class="fw-bold {% if invoice.status == 'overdue' %}text-danger{% endif %}">
+                                {{ invoice.amount|floatformat:2 }} ₽
+                            </div>
+                            {% if invoice.status == 'issued' %}
+                            <small class="text-success">К оплате</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ invoice.status_badge }} p-2">
+                                {% if invoice.status == 'issued' %}
+                                    <i class="fas fa-clock me-1"></i>
+                                {% elif invoice.status == 'paid' %}
+                                    <i class="fas fa-check-circle me-1"></i>
+                                {% elif invoice.status == 'overdue' %}
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                {% endif %}
+                                {{ invoice.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'billing:detail' invoice.pk %}" 
+                                   class="btn btn-outline-primary" title="Просмотреть">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if invoice.status == 'issued' %}
+                                <a href="#" class="btn btn-outline-success" title="Оплатить">
+                                    <i class="fas fa-credit-card"></i>
+                                </a>
+                                {% endif %}
+                                <a href="#" class="btn btn-outline-secondary" title="Скачать">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="fas fa-file-invoice fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Нет счетов</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% if invoices %}
+                <tfoot class="table-light">
+                    <tr>
+                        <td colspan="4" class="text-end">
+                            <strong>Итого:</strong>
+                        </td>
+                        <td>
+                            <strong>{{ total_amount|floatformat:2 }} ₽</strong>
+                        </td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Methods -->
+<div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Способы оплаты</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="card border h-100">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-credit-card fa-lg"></i>
+                        </div>
+                        <h6>Банковской картой</h6>
+                        <p class="small text-muted">Оплата онлайн через безопасный шлюз</p>
+                        <button class="btn btn-outline-primary btn-sm">Оплатить</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card border h-100">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper bg-success bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-university fa-lg"></i>
+                        </div>
+                        <h6>Банковский перевод</h6>
+                        <p class="small text-muted">По реквизитам в отделении банка</p>
+                        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#bankDetailsModal">
+                            Реквизиты
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card border h-100">
+                    <div class="card-body text-center">
+                        <div class="icon-wrapper bg-info bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-mobile-alt fa-lg"></i>
+                        </div>
+                        <h6>Электронные кошельки</h6>
+                        <p class="small text-muted">Qiwi, Яндекс.Деньги, WebMoney</p>
+                        <button class="btn btn-outline-info btn-sm">Оплатить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bank Details Modal -->
+<div class="modal fade" id="bankDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Банковские реквизиты</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th style="width: 40%">Полное наименование</th>
+                                <td>ООО "ЭнергоПоставщик"</td>
+                            </tr>
+                            <tr>
+                                <th>ИНН</th>
+                                <td>1234567890</td>
+                            </tr>
+                            <tr>
+                                <th>КПП</th>
+                                <td>123456789</td>
+                            </tr>
+                            <tr>
+                                <th>ОГРН</th>
+                                <td>1234567890123</td>
+                            </tr>
+                            <tr>
+                                <th>Банк</th>
+                                <td>ПАО "Сбербанк"</td>
+                            </tr>
+                            <tr>
+                                <th>БИК</th>
+                                <td>044525225</td>
+                            </tr>
+                            <tr>
+                                <th>Расчетный счет</th>
+                                <td>40702810500000012345</td>
+                            </tr>
+                            <tr>
+                                <th>Корреспондентский счет</th>
+                                <td>30101810400000000225</td>
+                            </tr>
+                            <tr>
+                                <th>Назначение платежа</th>
+                                <td>Оплата за электроэнергию по договору №[номер договора], период [период]</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <button type="button" class="btn btn-primary" id="copyBankDetails">
+                    <i class="fas fa-copy me-1"></i>Копировать
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Export functionality
+    const exportBtn = document.getElementById('exportInvoices');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const format = prompt('Выберите формат экспорта (csv, excel, pdf):', 'excel');
+            if (format) {
+                window.location.href = `/billing/export/?format=${format}&${window.location.search.slice(1)}`;
+            }
+        });
+    }
+    
+    // Copy bank details
+    const copyBankBtn = document.getElementById('copyBankDetails');
+    if (copyBankBtn) {
+        copyBankBtn.addEventListener('click', function() {
+            const bankDetails = `
+Полное наименование: ООО "ЭнергоПоставщик"
+ИНН: 1234567890
+КПП: 123456789
+ОГРН: 1234567890123
+Банк: ПАО "Сбербанк"
+БИК: 044525225
+Расчетный счет: 40702810500000012345
+Корреспондентский счет: 30101810400000000225
+Назначение платежа: Оплата за электроэнергию по договору №[номер договора], период [период]
+            `.trim();
+            
+            navigator.clipboard.writeText(bankDetails).then(function() {
+                alert('Реквизиты скопированы в буфер обмена');
+            }, function() {
+                alert('Не удалось скопировать реквизиты');
+            });
+        });
+    }
+    
+    // Auto-refresh for overdue invoices
+    const hasOverdue = {{ overdue_count }} > 0;
+    if (hasOverdue) {
+        setInterval(function() {
+            location.reload();
+        }, 300000); // Refresh every 5 minutes
+    }
+});
+</script>
+{% endblock %}

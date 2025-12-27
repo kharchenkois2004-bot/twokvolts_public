@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Регистрация нового клиента{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active" aria-current="page">Регистрация</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <div class="icon-wrapper bg-success bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="fas fa-user-plus fa-lg"></i>
+                    </div>
+                    <h2 class="h4 mb-0">Регистрация нового клиента</h2>
+                    <p class="text-muted">Заполните форму для создания аккаунта</p>
+                </div>
+                
+                <form method="post" id="registrationForm">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_username" class="form-label">Логин *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" name="username" id="id_username" 
+                                       class="form-control" placeholder="Придумайте логин" required>
+                            </div>
+                            <small class="form-text text-muted">Только латинские буквы, цифры и символы @/./+/-/_</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_email" class="form-label">Email *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" name="email" id="id_email" 
+                                       class="form-control" placeholder="example@mail.com" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_password1" class="form-label">Пароль *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" name="password1" id="id_password1" 
+                                       class="form-control" placeholder="Пароль" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="passwordHelp" class="form-text">
+                                <ul class="list-unstyled mb-0">
+                                    <li><small><i class="fas fa-check text-success" id="lengthCheck"></i> Минимум 8 символов</small></li>
+                                    <li><small><i class="fas fa-check text-success" id="digitCheck"></i> Содержит цифры</small></li>
+                                    <li><small><i class="fas fa-check text-success" id="letterCheck"></i> Содержит буквы</small></li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_password2" class="form-label">Подтверждение пароля *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" name="password2" id="id_password2" 
+                                       class="form-control" placeholder="Повторите пароль" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="passwordMatch" class="form-text">
+                                <small><i class="fas fa-check text-success"></i> Пароли должны совпадать</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3">Информация о потребителе</h5>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_full_name" class="form-label">ФИО или название организации *</label>
+                            <input type="text" name="full_name" id="id_full_name" 
+                                   class="form-control" placeholder="Иванов Иван Иванович" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_type" class="form-label">Тип потребителя *</label>
+                            <select name="type" id="id_type" class="form-select" required>
+                                <option value="" selected disabled>Выберите тип</option>
+                                <option value="individual">Физическое лицо</option>
+                                <option value="legal">Юридическое лицо</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_phone" class="form-label">Телефон *</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                <input type="tel" name="phone" id="id_phone" 
+                                       class="form-control" placeholder="+7 (999) 123-45-67" required>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_personal_account" class="form-label">Лицевой счет (если есть)</label>
+                            <input type="text" name="personal_account" id="id_personal_account" 
+                                   class="form-control" placeholder="Необязательно">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_address" class="form-label">Адрес подключения *</label>
+                        <textarea name="address" id="id_address" class="form-control" 
+                                  rows="3" placeholder="Полный адрес объекта" required></textarea>
+                    </div>
+                    
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input" id="id_agree_terms" required>
+                        <label class="form-check-label" for="id_agree_terms">
+                            Я согласен с <a href="#" class="text-decoration-none">условиями обработки персональных данных</a>
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+                        </button>
+                    </div>
+                </form>
+                
+                <hr class="my-4">
+                
+                <div class="text-center">
+                    <p class="mb-0">Уже есть аккаунт? 
+                        <a href="{% url 'login' %}" class="text-decoration-none">Войдите</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    const togglePassword1 = document.getElementById('togglePassword1');
+    const togglePassword2 = document.getElementById('togglePassword2');
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    
+    togglePassword1.addEventListener('click', function() {
+        const type = password1.getAttribute('type') === 'password' ? 'text' : 'password';
+        password1.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    });
+    
+    togglePassword2.addEventListener('click', function() {
+        const type = password2.getAttribute('type') === 'password' ? 'text' : 'password';
+        password2.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    });
+    
+    // Password validation
+    password1.addEventListener('input', validatePassword);
+    password2.addEventListener('input', validatePasswordConfirmation);
+    
+    function validatePassword() {
+        const password = password1.value;
+        const lengthCheck = document.getElementById('lengthCheck');
+        const digitCheck = document.getElementById('digitCheck');
+        const letterCheck = document.getElementById('letterCheck');
+        
+        // Length check
+        if (password.length >= 8) {
+            lengthCheck.className = 'fas fa-check text-success';
+        } else {
+            lengthCheck.className = 'fas fa-times text-danger';
+        }
+        
+        // Digit check
+        if (/\d/.test(password)) {
+            digitCheck.className = 'fas fa-check text-success';
+        } else {
+            digitCheck.className = 'fas fa-times text-danger';
+        }
+        
+        // Letter check
+        if (/[a-zA-Z]/.test(password)) {
+            letterCheck.className = 'fas fa-check text-success';
+        } else {
+            letterCheck.className = 'fas fa-times text-danger';
+        }
+        
+        validatePasswordConfirmation();
+    }
+    
+    function validatePasswordConfirmation() {
+        const password = password1.value;
+        const confirmation = password2.value;
+        const matchIcon = document.querySelector('#passwordMatch i');
+        
+        if (confirmation.length > 0) {
+            if (password === confirmation) {
+                matchIcon.className = 'fas fa-check text-success';
+            } else {
+                matchIcon.className = 'fas fa-times text-danger';
+            }
+        }
+    }
+    
+    // Phone input formatting
+    const phoneInput = document.getElementById('id_phone');
+    phoneInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.startsWith('7') || value.startsWith('8')) {
+            value = value.substring(1);
+        }
+        
+        let formatted = '+7 (';
+        if (value.length > 0) {
+            formatted += value.substring(0, 3);
+        }
+        if (value.length >= 4) {
+            formatted += ') ' + value.substring(3, 6);
+        }
+        if (value.length >= 7) {
+            formatted += '-' + value.substring(6, 8);
+        }
+        if (value.length >= 9) {
+            formatted += '-' + value.substring(8, 10);
+        }
+        
+        e.target.value = formatted.substring(0, 18);
+    });
+    
+    // Form validation
+    const form = document.getElementById('registrationForm');
+    form.addEventListener('submit', function(e) {
+        const password1 = document.getElementById('id_password1').value;
+        const password2 = document.getElementById('id_password2').value;
+        
+        if (password1 !== password2) {
+            e.preventDefault();
+            alert('Пароли не совпадают!');
+        }
+    });
+});
+</script>
+{% endblock %}

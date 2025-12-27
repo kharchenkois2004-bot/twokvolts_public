@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+
+{% block title %}Мой профиль{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Личный кабинет</a></li>
+<li class="breadcrumb-item active" aria-current="page">Мой профиль</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Profile Information -->
+    <div class="col-lg-4 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="avatar-wrapper mb-3">
+                    <div class="bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center" 
+                         style="width: 100px; height: 100px;">
+                        {% if consumer.type == 'individual' %}
+                        <i class="fas fa-user fa-3x"></i>
+                        {% else %}
+                        <i class="fas fa-building fa-3x"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                <h4 class="card-title mb-1">{{ consumer.full_name }}</h4>
+                <p class="text-muted mb-3">
+                    <span class="badge bg-info">{{ consumer.get_type_display }}</span>
+                </p>
+                
+                <div class="d-grid gap-2 mb-4">
+                    <a href="{% url 'profile' %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Редактировать профиль
+                    </a>
+                    <a href="{% url 'password_change' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-key me-2"></i>Сменить пароль
+                    </a>
+                </div>
+                
+                <hr>
+                
+                <div class="text-start">
+                    <h6 class="mb-3"><i class="fas fa-id-card me-2"></i>Контактная информация</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-user-tag me-2 text-muted"></i>
+                            <strong>ЛС:</strong> {{ consumer.personal_account }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-phone me-2 text-muted"></i>
+                            <strong>Телефон:</strong> {{ consumer.phone }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-envelope me-2 text-muted"></i>
+                            <strong>Email:</strong> {{ user.email }}
+                        </li>
+                        <li>
+                            <i class="fas fa-map-marker-alt me-2 text-muted"></i>
+                            <strong>Адрес:</strong> {{ consumer.address }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Security Info -->
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Безопасность</h6>
+            </div>
+            <div class="card-body">
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item border-0 px-0">
+                        <div class="d-flex w-100 justify-content-between">
+                            <span>Последний вход</span>
+                            <small class="text-muted">{{ user.last_login|date:"d.m.Y H:i"|default:"—" }}</small>
+                        </div>
+                    </div>
+                    <div class="list-group-item border-0 px-0">
+                        <div class="d-flex w-100 justify-content-between">
+                            <span>Дата регистрации</span>
+                            <small class="text-muted">{{ consumer.created_at|date:"d.m.Y" }}</small>
+                        </div>
+                    </div>
+                    <div class="list-group-item border-0 px-0">
+                        <div class="d-flex w-100 justify-content-between">
+                            <span>Статус аккаунта</span>
+                            <span class="badge bg-success">Активен</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        <!-- Contracts -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Мои договоры</h5>
+                <a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newContractModal">
+                    <i class="fas fa-plus me-1"></i>Новый договор
+                </a>
+            </div>
+            <div class="card-body">
+                {% if contracts %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Номер договора</th>
+                                <th>Тариф</th>
+                                <th>Счетчик</th>
+                                <th>Дата начала</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for contract in contracts %}
+                            <tr>
+                                <td>
+                                    <strong>{{ contract.contract_number }}</strong><br>
+                                    <small class="text-muted">{{ contract.consumer.full_name }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ contract.tariff.name }}</span><br>
+                                    <small>{{ contract.tariff.rate }} ₽/кВт·ч</small>
+                                </td>
+                                <td>
+                                    {{ contract.meter_number }}<br>
+                                    <small class="text-muted">установлен {{ contract.meter_installation_date|date:"d.m.Y" }}</small>
+                                </td>
+                                <td>{{ contract.start_date|date:"d.m.Y" }}</td>
+                                <td>
+                                    {% if contract.is_active %}
+                                    <span class="badge bg-success">Активен</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Не активен</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="" 
+                                           class="btn btn-outline-primary" title="Просмотреть">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if contract.is_active %}
+                                        <a href="#" class="btn btn-outline-warning" title="Приостановить">
+                                            <i class="fas fa-pause"></i>
+                                        </a>
+                                        {% else %}
+                                        <a href="#" class="btn btn-outline-success" title="Возобновить">
+                                            <i class="fas fa-play"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-file-contract fa-3x text-muted mb-3"></i>
+                    <p class="text-muted mb-4">У вас нет заключенных договоров</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newContractModal">
+                        <i class="fas fa-plus me-2"></i>Заключить первый договор
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Activity History -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>История активности</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for activity in activities %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            {% if activity.type == 'reading' %}
+                            <i class="fas fa-tachometer-alt"></i>
+                            {% elif activity.type == 'payment' %}
+                            <i class="fas fa-credit-card"></i>
+                            {% elif activity.type == 'invoice' %}
+                            <i class="fas fa-file-invoice"></i>
+                            {% else %}
+                            <i class="fas fa-bell"></i>
+                            {% endif %}
+                        </div>
+                        <div class="timeline-content">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">{{ activity.title }}</h6>
+                                <small class="text-muted">{{ activity.date|date:"d.m.Y H:i" }}</small>
+                            </div>
+                            <p class="mb-0 text-muted">{{ activity.description }}</p>
+                            {% if activity.details %}
+                            <small class="text-muted">{{ activity.details }}</small>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Нет данных об активности</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Contract Modal -->
+<div class="modal fade" id="newContractModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Новый договор поставки электроэнергии</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newContractForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Тип договора *</label>
+                            <select class="form-select" required>
+                                <option value="">Выберите тип</option>
+                                <option value="standard">Стандартный</option>
+                                <option value="premium">Премиум</option>
+                                <option value="business">Для бизнеса</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Адрес объекта *</label>
+                            <input type="text" class="form-control" value="{{ consumer.address }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Мощность подключения (кВт) *</label>
+                            <input type="number" class="form-control" min="1" max="150" value="15" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Напряжение сети *</label>
+                            <select class="form-select" required>
+                                <option value="220">220 В (однофазное)</option>
+                                <option value="380">380 В (трехфазное)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Номер счетчика (если есть)</label>
+                        <input type="text" class="form-control" placeholder="Введите номер счетчика">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Тарифный план *</label>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="tariff" id="tariff1" checked>
+                            <label class="form-check-label" for="tariff1">
+                                <strong>Одноставочный</strong> - 5.50 ₽/кВт·ч (круглосуточно)
+                            </label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="tariff" id="tariff2">
+                            <label class="form-check-label" for="tariff2">
+                                <strong>Двухставочный</strong> - 6.50 ₽/кВт·ч (день), 2.50 ₽/кВт·ч (ночь)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="tariff" id="tariff3">
+                            <label class="form-check-label" for="tariff3">
+                                <strong>Многотарифный</strong> - индивидуальный расчет
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-info-circle me-2"></i>Информация</h6>
+                        <p class="small mb-0">
+                            После подачи заявки с вами свяжется наш специалист для уточнения деталей 
+                            и согласования даты заключения договора.
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" id="submitContractBtn">Отправить заявку</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+.timeline:before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #0d6efd;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // New contract form submission
+    const submitContractBtn = document.getElementById('submitContractBtn');
+    if (submitContractBtn) {
+        submitContractBtn.addEventListener('click', function() {
+            const form = document.getElementById('newContractForm');
+            if (form.checkValidity()) {
+                // Simulate form submission
+                const modal = bootstrap.Modal.getInstance(document.getElementById('newContractModal'));
+                modal.hide();
+                
+                // Show success message
+                alert('Заявка на заключение договора успешно отправлена! С вами свяжется наш специалист в течение 24 часов.');
+            } else {
+                form.reportValidity();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

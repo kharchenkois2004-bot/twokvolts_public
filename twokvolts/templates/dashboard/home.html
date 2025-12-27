@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Личный кабинет{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item active" aria-current="page">Личный кабинет</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-lg-3 mb-4">
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body text-center p-4">
+                <div class="avatar-wrapper mb-3">
+                    <div class="bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center" 
+                         style="width: 80px; height: 80px;">
+                        <i class="fas fa-user fa-2x"></i>
+                    </div>
+                </div>
+                <h5 class="card-title mb-1">{{ consumer.full_name }}</h5>
+                <p class="text-muted small mb-3">
+                    <i class="fas fa-id-card me-1"></i>{{ consumer.personal_account }}
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'profile' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-user-edit me-1"></i>Редактировать профиль
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="fas fa-bars me-2"></i>Навигация</h6>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="{% url 'dashboard' %}" class="list-group-item list-group-item-action {% if request.path == '/dashboard/' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt me-2"></i>Обзор
+                </a>
+                <a href="{% url 'meter_readings:list' %}" class="list-group-item list-group-item-action {% if 'meter-readings' in request.path %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt me-2"></i>Показания счетчиков
+                </a>
+                <a href="{% url 'billing:list' %}" class="list-group-item list-group-item-action {% if 'billing' in request.path %}active{% endif %}">
+                    <i class="fas fa-file-invoice-dollar me-2"></i>Счета и оплата
+                </a>
+                <a href="" class="list-group-item list-group-item-action">
+                    <i class="fas fa-file-contract me-2"></i>Мои договоры
+                </a>
+                <a href="{% url 'dashboard_overview' %}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-chart-line me-2"></i>Статистика
+                </a>
+                <a href="{% url 'notifications' %}" class="list-group-item list-group-item-action position-relative">
+                    <i class="fas fa-bell me-2"></i>Уведомления
+                    {% if consumer.unread_notifications > 0 %}
+                    <span class="badge bg-danger rounded-pill position-absolute end-3">
+                        {{ consumer.unread_notifications }}
+                    </span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'profile' %}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-user-cog me-2"></i>Настройки
+                </a>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="fas fa-bolt me-2"></i>Быстрые действия</h6>
+            </div>
+            <div class="card-body p-3">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'meter_readings:submit' %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus me-1"></i>Подать показания
+                    </a>
+                    <a href="{% url 'billing:list' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-credit-card me-1"></i>Оплатить счета
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="col-lg-9">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Текущая задолженность</h6>
+                                <h3 class="mb-0">{{ total_debt|floatformat:2 }} ₽</h3>
+                            </div>
+                            <div class="icon-wrapper bg-danger bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Просроченных счетов</h6>
+                                <h3 class="mb-0">{{ overdue_invoices }}</h3>
+                            </div>
+                            <div class="icon-wrapper bg-warning bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Активных договоров</h6>
+                                <h3 class="mb-0">{{ active_contracts.count }}</h3>
+                            </div>
+                            <div class="icon-wrapper bg-success bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-file-contract"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Среднее потребление</h6>
+                                <h3 class="mb-0">{{ avg_consumption|floatformat:2 }} кВт·ч</h3>
+                            </div>
+                            <div class="icon-wrapper bg-info bg-gradient text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                 style="width: 50px; height: 50px;">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Current Invoices -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-file-invoice-dollar me-2"></i>Текущие счета</h5>
+                <a href="{% url 'billing:list' %}" class="btn btn-sm btn-outline-primary">Все счета</a>
+            </div>
+            <div class="card-body">
+                {% if current_invoices %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Период</th>
+                                <th>Договор</th>
+                                <th>Сумма</th>
+                                <th>Срок оплаты</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in current_invoices %}
+                            <tr>
+                                <td>{{ invoice.period|date:"F Y" }}</td>
+                                <td>
+                                    <small class="text-muted">{{ invoice.contract.contract_number }}</small>
+                                </td>
+                                <td>
+                                    <strong>{{ invoice.amount|floatformat:2 }} ₽</strong>
+                                </td>
+                                <td>
+                                    {{ invoice.due_date|date:"d.m.Y" }}
+                                    {% if invoice.is_overdue %}
+                                    <span class="badge bg-danger ms-1">Просрочен</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ invoice.status_badge }}">
+                                        {{ invoice.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'billing:detail' invoice.pk %}" 
+                                           class="btn btn-outline-primary" title="Просмотреть">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if invoice.status == 'issued' %}
+                                        <a href="#" class="btn btn-outline-success" title="Оплатить">
+                                            <i class="fas fa-credit-card"></i>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-file-invoice fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Нет текущих счетов</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Recent Meter Readings -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Последние показания</h5>
+                        <a href="{% url 'meter_readings:list' %}" class="btn btn-sm btn-outline-primary">Все</a>
+                    </div>
+                    <div class="card-body">
+                        {% if latest_readings %}
+                        <div class="list-group list-group-flush">
+                            {% for reading in latest_readings %}
+                            <div class="list-group-item border-0 px-0">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">{{ reading.contract.contract_number }}</h6>
+                                        <small class="text-muted">{{ reading.reading_date|date:"d.m.Y" }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="h6 mb-0">{{ reading.value|floatformat:2 }} кВт·ч</span><br>
+                                        <small class="text-muted">{{ reading.contract.tariff.name }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-tachometer-alt fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Нет поданых показаний</p>
+                            <a href="{% url 'meter_readings:submit' %}" class="btn btn-primary btn-sm">
+                                Подать первые показания
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Недавние платежи</h5>
+                        <a href="#" class="btn btn-sm btn-outline-primary">Все</a>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_payments %}
+                        <div class="list-group list-group-flush">
+                            {% for payment in recent_payments %}
+                            <div class="list-group-item border-0 px-0">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div>
+                                        <h6 class="mb-1">Оплата счета #{{ payment.invoice.id }}</h6>
+                                        <small class="text-muted">{{ payment.payment_date|date:"d.m.Y" }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="h6 mb-0 text-success">{{ payment.amount|floatformat:2 }} ₽</span><br>
+                                        <small class="text-muted">{{ payment.invoice.contract.contract_number }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Нет платежей</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Contracts -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Активные договоры</h5>
+            </div>
+            <div class="card-body">
+                {% if active_contracts %}
+                <div class="row">
+                    {% for contract in active_contracts %}
+                    <div class="col-md-6 mb-3">
+                        <div class="card border h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-0">{{ contract.contract_number }}</h6>
+                                    <span class="badge bg-success">Активен</span>
+                                </div>
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-tachometer-alt me-1"></i>
+                                    Счетчик: {{ contract.meter_number }}
+                                </p>
+                                <p class="text-muted small mb-3">
+                                    <i class="fas fa-money-bill-wave me-1"></i>
+                                    Тариф: {{ contract.tariff.name }} ({{ contract.tariff.rate }} ₽/кВт·ч)
+                                </p>
+                                <div class="d-flex justify-content-between">
+                                    <small class="text-muted">С: {{ contract.start_date|date:"d.m.Y" }}</small>
+                                    <a href="" 
+                                       class="btn btn-sm btn-outline-primary">Подробнее</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-file-contract fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Нет активных договоров</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.avatar-wrapper {
+    transition: transform 0.3s ease;
+}
+.avatar-wrapper:hover {
+    transform: scale(1.05);
+}
+.icon-wrapper {
+    transition: transform 0.3s ease;
+}
+.card:hover .icon-wrapper {
+    transform: rotate(5deg);
+}
+.list-group-item.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+</style>
+{% endblock %}

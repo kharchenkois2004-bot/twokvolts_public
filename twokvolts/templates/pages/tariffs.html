@@ -1,0 +1,319 @@
+{% extends 'base.html' %}
+
+{% block title %}Тарифы на электроэнергию{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h2 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Тарифы на электроэнергию</h2>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Мы предлагаем прозрачные и конкурентные тарифы для всех категорий потребителей. 
+                    Выберите оптимальный тариф для ваших нужд.
+                </p>
+                
+                <!-- Tariff Tabs -->
+                <ul class="nav nav-tabs mb-4" id="tariffTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="population-tab" data-bs-toggle="tab" 
+                                data-bs-target="#population" type="button" role="tab">
+                            <i class="fas fa-home me-2"></i>Население
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="business-tab" data-bs-toggle="tab" 
+                                data-bs-target="#business" type="button" role="tab">
+                            <i class="fas fa-building me-2"></i>Бизнес
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="industrial-tab" data-bs-toggle="tab" 
+                                data-bs-target="#industrial" type="button" role="tab">
+                            <i class="fas fa-industry me-2"></i>Промышленность
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Tariff Content -->
+                <div class="tab-content" id="tariffTabsContent">
+                    <!-- Population Tariffs -->
+                    <div class="tab-pane fade show active" id="population" role="tabpanel">
+                        <div class="row">
+                            {% for tariff in population_tariffs %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card border h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">{{ tariff.name }}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="text-center mb-4">
+                                            <div class="display-4 fw-bold text-primary">{{ tariff.rate }}</div>
+                                            <p class="text-muted">руб./кВт·ч</p>
+                                        </div>
+                                        <p class="card-text">{{ tariff.description }}</p>
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-check text-success me-2"></i>Без абонентской платы</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Прозрачные расчеты</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Онлайн подача показаний</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-footer bg-white">
+                                        {% if user.is_authenticated %}
+                                        <button class="btn btn-primary w-100" data-bs-toggle="modal" 
+                                                data-bs-target="#connectTariffModal" data-tariff="{{ tariff.id }}">
+                                            Подключить
+                                        </button>
+                                        {% else %}
+                                        <a href="{% url 'register' %}" class="btn btn-primary w-100">
+                                            Зарегистрироваться
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Business Tariffs -->
+                    <div class="tab-pane fade" id="business" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Тариф</th>
+                                        <th>Мощность</th>
+                                        <th>День (07:00-23:00)</th>
+                                        <th>Ночь (23:00-07:00)</th>
+                                        <th>Описание</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for tariff in business_tariffs %}
+                                    <tr>
+                                        <td><strong>{{ tariff.name }}</strong></td>
+                                        <td>до {{ tariff.max_power }} кВт</td>
+                                        <td>{{ tariff.day_rate }} ₽/кВт·ч</td>
+                                        <td>{{ tariff.night_rate }} ₽/кВт·ч</td>
+                                        <td>{{ tariff.description }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Industrial Tariffs -->
+                    <div class="tab-pane fade" id="industrial" role="tabpanel">
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-info-circle me-2"></i>Индивидуальные тарифы</h5>
+                            <p class="mb-0">
+                                Для промышленных предприятий мы разрабатываем индивидуальные тарифные планы 
+                                с учетом специфики производства и графика работы.
+                            </p>
+                        </div>
+                        <div class="text-center py-4">
+                            <i class="fas fa-industry fa-3x text-muted mb-3"></i>
+                            <h4>Индивидуальный расчет</h4>
+                            <p class="text-muted mb-4">
+                                Для получения коммерческого предложения свяжитесь с нашим отделом продаж
+                            </p>
+                            <a href="{% url 'contact' %}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-phone me-2"></i>Связаться с отделом продаж
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Calculator -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h4 class="mb-0"><i class="fas fa-calculator me-2"></i>Калькулятор стоимости</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="calcTariff" class="form-label">Тариф</label>
+                        <select id="calcTariff" class="form-select">
+                            {% for tariff in all_tariffs %}
+                            <option value="{{ tariff.rate }}">{{ tariff.name }} ({{ tariff.rate }} ₽/кВт·ч)</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="calcConsumption" class="form-label">Потребление (кВт·ч)</label>
+                        <input type="number" id="calcConsumption" class="form-control" value="100" min="0" step="1">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="alert alert-success">
+                            <h6 class="mb-1">Стоимость:</h6>
+                            <div class="display-6 fw-bold" id="calcResult">0 ₽</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="alert alert-info">
+                            <h6 class="mb-1">Среднемесячно:</h6>
+                            <div class="h4 fw-bold" id="calcMonthly">0 ₽</div>
+                        </div>
+                    </div>
+                </div>
+                <button id="calculateBtn" class="btn btn-primary">
+                    <i class="fas fa-calculator me-2"></i>Рассчитать
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <!-- Important Information -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>Важная информация</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-clock me-2"></i>Сроки действия тарифов</h6>
+                    <p class="small mb-0">
+                        Тарифы утверждаются на календарный год. 
+                        Изменения вступают в силу с 1 января.
+                    </p>
+                </div>
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-percentage me-2"></i>НДС</h6>
+                    <p class="small mb-0">
+                        Все тарифы указаны без учета НДС 20%. 
+                        Для юридических лиц применяется НДС.
+                    </p>
+                </div>
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-bolt me-2"></i>Экономия</h6>
+                    <p class="small mb-0">
+                        Переход на многотарифный учет позволяет 
+                        экономить до 30% на оплате электроэнергии.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- How to Save -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Как экономить электроэнергию</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Используйте энергосберегающие лампы</strong>
+                        <p class="small text-muted mb-0">Экономят до 80% электроэнергии</p>
+                    </li>
+                    <li class="mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Выключайте технику из розеток</strong>
+                        <p class="small text-muted mb-0">Даже в режиме ожидания приборы потребляют энергию</p>
+                    </li>
+                    <li class="mb-3">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Перейдите на многотарифный учет</strong>
+                        <p class="small text-muted mb-0">Используйте ночные тарифы для энергоемких приборов</p>
+                    </li>
+                    <li>
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <strong>Своевременно подавайте показания</strong>
+                        <p class="small text-muted mb-0">Избегайте расчетов по среднему потреблению</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Connect Tariff Modal -->
+<div class="modal fade" id="connectTariffModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подключение тарифа</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="connectTariffForm">
+                    <div class="mb-3">
+                        <label class="form-label">Выбранный тариф</label>
+                        <input type="text" class="form-control" id="selectedTariff" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Договор</label>
+                        <select class="form-select" required>
+                            <option value="">Выберите договор</option>
+                            {% for contract in user.consumer.contracts.all %}
+                            <option value="{{ contract.id }}">{{ contract.contract_number }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Дата перехода</label>
+                        <input type="date" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary">Отправить заявку</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Calculator
+    const tariffSelect = document.getElementById('calcTariff');
+    const consumptionInput = document.getElementById('calcConsumption');
+    const resultElement = document.getElementById('calcResult');
+    const monthlyElement = document.getElementById('calcMonthly');
+    const calculateBtn = document.getElementById('calculateBtn');
+    
+    function calculate() {
+        const tariff = parseFloat(tariffSelect.value);
+        const consumption = parseFloat(consumptionInput.value);
+        
+        if (!isNaN(tariff) && !isNaN(consumption)) {
+            const cost = tariff * consumption;
+            const monthly = cost / 12;
+            
+            resultElement.textContent = cost.toFixed(2) + ' ₽';
+            monthlyElement.textContent = monthly.toFixed(2) + ' ₽';
+        }
+    }
+    
+    calculateBtn.addEventListener('click', calculate);
+    tariffSelect.addEventListener('change', calculate);
+    consumptionInput.addEventListener('input', calculate);
+    
+    // Initial calculation
+    calculate();
+    
+    // Tariff modal
+    const connectModal = document.getElementById('connectTariffModal');
+    if (connectModal) {
+        connectModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const tariffId = button.getAttribute('data-tariff');
+            const tariffName = button.closest('.card').querySelector('.card-header h5').textContent;
+            
+            document.getElementById('selectedTariff').value = tariffName;
+        });
+    }
+});
+</script>
+{% endblock %}

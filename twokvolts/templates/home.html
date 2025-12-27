@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %}ЭнергоПоставщик - Надежные поставки электроэнергии{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-primary bg-gradient text-white py-5 mb-5 rounded-3">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Электроэнергия для дома и бизнеса</h1>
+                <p class="lead mb-4">
+                    Современные тарифы, удобный личный кабинет и профессиональная поддержка. 
+                    Подключайтесь к надежному поставщику электроэнергии.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-light btn-lg px-4">
+                            <i class="fas fa-tachometer-alt me-2"></i>Личный кабинет
+                        </a>
+                    {% else %}
+                        <a href="{% url 'register' %}" class="btn btn-light btn-lg px-4">
+                            <i class="fas fa-user-plus me-2"></i>Стать клиентом
+                        </a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-light btn-lg px-4">
+                            <i class="fas fa-sign-in-alt me-2"></i>Войти в ЛК
+                        </a>
+                    {% endif %}
+                    <a href="{% url 'tariffs' %}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-money-bill-wave me-2"></i>Тарифы
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <img src="{% static 'img/energy-hero.webp' %}" alt="Энергия" class="img-fluid" style="max-height: 300px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features -->
+<div class="row mb-5">
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="icon-wrapper bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                    <i class="fas fa-bolt fa-2x"></i>
+                </div>
+                <h3 class="card-title h4 mb-3">Стабильная подача</h3>
+                <p class="card-text text-muted">
+                    Гарантируем бесперебойное электроснабжение 24/7 с минимальными перебоями
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="icon-wrapper bg-success bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                    <i class="fas fa-chart-line fa-2x"></i>
+                </div>
+                <h3 class="card-title h4 mb-3">Прозрачные тарифы</h3>
+                <p class="card-text text-muted">
+                    Никаких скрытых платежей. Четкие тарифы и детализация всех начислений
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="icon-wrapper bg-info bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                    <i class="fas fa-mobile-alt fa-2x"></i>
+                </div>
+                <h3 class="card-title h4 mb-3">Удобный ЛК</h3>
+                <p class="card-text text-muted">
+                    Подавайте показания и оплачивайте счета онлайн в удобное время
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works -->
+<div class="row align-items-center mb-5">
+    <div class="col-lg-6 mb-4 mb-lg-0">
+        <h2 class="mb-4">Как стать нашим клиентом</h2>
+        <div class="step-card mb-3">
+            <div class="d-flex align-items-start">
+                <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">1</div>
+                <div>
+                    <h5 class="mb-2">Оставьте заявку</h5>
+                    <p class="text-muted mb-0">Зарегистрируйтесь в личном кабинете или позвоните нам</p>
+                </div>
+            </div>
+        </div>
+        <div class="step-card mb-3">
+            <div class="d-flex align-items-start">
+                <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">2</div>
+                <div>
+                    <h5 class="mb-2">Заключите договор</h5>
+                    <p class="text-muted mb-0">Подпишите договор поставки электроэнергии</p>
+                </div>
+            </div>
+        </div>
+        <div class="step-card mb-3">
+            <div class="d-flex align-items-start">
+                <div class="step-number bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">3</div>
+                <div>
+                    <h5 class="mb-2">Начните работу</h5>
+                    <p class="text-muted mb-0">Мы подключим вас к сети и начнем поставку электроэнергии</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="card-title mb-3">Быстрая регистрация</h4>
+                <form method="post" action="{% url 'register' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <input type="email" class="form-control" placeholder="Ваш email" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="tel" class="form-control" placeholder="Номер телефона" required>
+                    </div>
+                    <div class="mb-3">
+                        <select class="form-select" required>
+                            <option value="" disabled selected>Тип потребителя</option>
+                            <option value="individual">Физическое лицо</option>
+                            <option value="legal">Юридическое лицо</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-paper-plane me-2"></i>Отправить заявку
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions for Logged In Users -->
+{% if user.is_authenticated %}
+<div class="card border-0 shadow-sm mb-5">
+    <div class="card-body p-4">
+        <h4 class="card-title mb-4">Быстрые действия</h4>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a href="{% url 'meter_readings:submit' %}" class="card action-card h-100 text-decoration-none">
+                    <div class="card-body text-center p-4">
+                        <i class="fas fa-tachometer-alt fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Подать показания</h5>
+                        <p class="card-text text-muted small">Передайте текущие показания счетчика</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{% url 'billing:list' %}" class="card action-card h-100 text-decoration-none">
+                    <div class="card-body text-center p-4">
+                        <i class="fas fa-file-invoice-dollar fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Оплатить счета</h5>
+                        <p class="card-text text-muted small">Оплатите выставленные счета онлайн</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="{% url 'dashboard' %}" class="card action-card h-100 text-decoration-none">
+                    <div class="card-body text-center p-4">
+                        <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Статистика</h5>
+                        <p class="card-text text-muted small">Анализ потребления и расходов</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Statistics -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h4 class="card-title mb-4 text-center">Мы в цифрах</h4>
+                <div class="row text-center">
+                    <div class="col-md-3 mb-3">
+                        <div class="display-4 fw-bold text-primary">15+</div>
+                        <p class="text-muted">Лет на рынке</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="display-4 fw-bold text-primary">50K+</div>
+                        <p class="text-muted">Довольных клиентов</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="display-4 fw-bold text-primary">99.8%</div>
+                        <p class="text-muted">Надежность поставок</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="display-4 fw-bold text-primary">24/7</div>
+                        <p class="text-muted">Техническая поддержка</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA -->
+<div class="text-center py-5">
+    <h2 class="mb-4">Готовы стать нашим клиентом?</h2>
+    <p class="lead mb-4">Присоединяйтесь к тысячам довольных клиентов уже сегодня</p>
+    <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">
+        <i class="fas fa-user-plus me-2"></i>Начать сотрудничество
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+}
+.icon-wrapper {
+    transition: transform 0.3s ease;
+}
+.card:hover .icon-wrapper {
+    transform: scale(1.1);
+}
+.step-card {
+    padding: 15px;
+    border-left: 3px solid #0d6efd;
+    background-color: #f8f9fa;
+    border-radius: 0 5px 5px 0;
+}
+.action-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #dee2e6;
+}
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}
